@@ -30,8 +30,12 @@ def transform_sales_data(df: pd.DataFrame):
 
     dim_product.insert(
         0,
-        "product_id",
+        "id",
         range(1, len(dim_product)+1)
+    )
+
+    dim_product_merge = dim_product.rename(
+        columns={"id": "product_id"}
     )
 
     dim_location = (
@@ -50,8 +54,12 @@ def transform_sales_data(df: pd.DataFrame):
 
     dim_location.insert(
         0,
-        "location_id",
+        "id",
         range(1, len(dim_location)+1)
+    )
+
+    dim_location_merge = dim_location.rename(
+        columns={"id": "location_id"}
     )
 
     dim_shipping = (
@@ -66,8 +74,12 @@ def transform_sales_data(df: pd.DataFrame):
 
     dim_shipping.insert(
         0,
-        "shipping_id",
+        "id",
         range(1, len(dim_shipping)+1)
+    )
+    
+    dim_shipping_merge = dim_shipping.rename(
+        columns={"id": "shipping_id"}
     )
 
     dim_customer = (
@@ -82,12 +94,16 @@ def transform_sales_data(df: pd.DataFrame):
 
     dim_customer.insert(
         0,
-        "customer_id",
+        "id",
         range(1, len(dim_customer)+1)
     )
 
+    dim_customer_merge = dim_customer.rename(
+        columns={"id": "customer_id"}
+    )
+
     fact_sales = df.merge(
-        dim_product,
+        dim_product_merge,
         on=[
             "category",
             "sub_category"
@@ -96,7 +112,7 @@ def transform_sales_data(df: pd.DataFrame):
     )
 
     fact_sales = fact_sales.merge(
-        dim_location,
+        dim_location_merge,
         on=[
             "country",
             "city",
@@ -109,7 +125,7 @@ def transform_sales_data(df: pd.DataFrame):
     )
 
     fact_sales = fact_sales.merge(
-        dim_shipping,
+        dim_shipping_merge,
         on=[
             "ship_mode"
         ],
@@ -118,7 +134,7 @@ def transform_sales_data(df: pd.DataFrame):
     )
 
     fact_sales = fact_sales.merge(
-        dim_customer,
+        dim_customer_merge,
         on=[
             "segment"
         ],
