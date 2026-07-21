@@ -28,6 +28,12 @@ def transform_sales_data(df: pd.DataFrame):
         .reset_index(drop=True)
     )
 
+    dim_product.insert(
+        0,
+        "product_id",
+        range(1, len(dim_product)+1)
+    )
+
     dim_location = (
         df[
             [
@@ -42,6 +48,12 @@ def transform_sales_data(df: pd.DataFrame):
         .reset_index(drop=True)
     )
 
+    dim_location.insert(
+        0,
+        "location_id",
+        range(1, len(dim_location)+1)
+    )
+
     dim_shipping = (
         df[
             [
@@ -50,6 +62,12 @@ def transform_sales_data(df: pd.DataFrame):
         ]
         .drop_duplicates()
         .reset_index(drop=True)
+    )
+
+    dim_shipping.insert(
+        0,
+        "shipping_id",
+        range(1, len(dim_shipping)+1)
     )
 
     dim_customer = (
@@ -62,10 +80,69 @@ def transform_sales_data(df: pd.DataFrame):
         .reset_index(drop=True)
     )
 
+    dim_customer.insert(
+        0,
+        "customer_id",
+        range(1, len(dim_customer)+1)
+    )
+
+    fact_sales = df.merge(
+        dim_product,
+        on=[
+            "category",
+            "sub_category"
+        ],
+        how="left"
+    )
+
+    fact_sales = fact_sales.merge(
+        dim_location,
+        on=[
+            "country",
+            "city",
+            "state",
+            "postal_code",
+            "region"
+        ],
+        how="left",
+        suffixes=("", "_location")
+    )
+
+    fact_sales = fact_sales.merge(
+        dim_shipping,
+        on=[
+            "ship_mode"
+        ],
+        how="left",
+        suffixes=("", "_shipping")
+    )
+
+    fact_sales = fact_sales.merge(
+        dim_customer,
+        on=[
+            "segment"
+        ],
+        how="left",
+        suffixes=("", "_customer")
+    )
+
+    fact_sales = fact_sales[
+        [
+            "product_id",
+            "location_id",
+            "shipping_id",
+            "customer_id",
+            "sales",
+            "quantity",
+            "discount",
+            "profit"
+        ]
+    ]
+
     return {
         "dim_product": dim_product,
         "dim_location": dim_location,
         "dim_shipping": dim_shipping,
         "dim_customer": dim_customer,
-        "fact_sales": df
+        "fact_sales": fact_sales
     }
